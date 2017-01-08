@@ -29,7 +29,7 @@ def init(folder):
 @click.command(help="Bundles package for deployment.")
 @click.option('--local-package', default=None, help='Install local package as well.', type=click.Path())
 def build(local_package):
-    aws_lambda.build(CURRENT_DIR, local_package)
+    aws_lambda.build(CURRENT_DIR, local_package, copy_file=None)
 
 
 @click.command(help="Run a local test of your function.")
@@ -41,8 +41,9 @@ def invoke(event_file, verbose):
 
 @click.command(help="Register and deploy your code to lambda.")
 @click.option('--local-package', default=None, help='Install local package as well.', type=click.Path())
-def deploy(local_package):
-    aws_lambda.deploy(CURRENT_DIR, local_package)
+@click.option('--copy-file', default=None, help='Copies file/directory', type=click.Path())
+def deploy(local_package, copy_file):
+    aws_lambda.deploy(CURRENT_DIR, local_package, copy_file)
 
 
 @click.command(help="Delete old versions of your functions")

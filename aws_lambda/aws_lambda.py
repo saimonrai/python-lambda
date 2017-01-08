@@ -62,7 +62,7 @@ def cleanup_old_versions(src, keep_last_versions):
                                                               e.message))
 
 
-def deploy(src, local_package=None):
+def deploy(src, local_package=None, copy_file=None):
     """Deploys a new function to AWS Lambda.
 
     :param str src:
@@ -80,7 +80,7 @@ def deploy(src, local_package=None):
     # folder then add the handler file in the root of this directory.
     # Zip the contents of this folder into a single file and output to the dist
     # directory.
-    path_to_zip_file = build(src, local_package)
+    path_to_zip_file = build(src, local_package, copy_file)
 
     if function_exists(cfg, cfg.get('function_name')):
         update_function(cfg, path_to_zip_file)
@@ -146,7 +146,7 @@ def init(src, minimal=False):
         copy(destination, src)
 
 
-def build(src, local_package=None):
+def build(src, local_package=None, copy_file=None):
     """Builds the file bundle.
 
     :param str src:
@@ -195,6 +195,20 @@ def build(src, local_package=None):
 
         # Copy handler file into root of the packages folder.
         copyfile(f, os.path.join(path_to_temp, filename))
+
+    if copy_file:
+        if os.path.isfile(copy_file):
+            copyfile(copy_file,
+                     os.path.join(path_to_temp, os.path.basename(copy_file)))
+        elif os.path.isdir(copy_file):
+            copy_dir_name = os.path.basename(copy_file)
+            dest_dir = os.path.join(path_to_temp, copy_dir_name)
+
+            from shutil import rmtree, copytree
+
+            if os.path.exists(dest_dir):
+                rmtree(dest_dir)
+            copytree(copy_file, dest_dir)
 
     # Zip them together into a single file.
     # TODO: Delete temp directory created once the archive has been compiled.
